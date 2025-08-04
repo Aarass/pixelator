@@ -1,5 +1,7 @@
 use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
 
+use crate::utils::weak_random;
+
 pub struct Section {
     pub x: u32,
     pub y: u32,
@@ -26,7 +28,7 @@ impl Section {
             return;
         };
 
-        if self.w <= 10 || self.h <= 10 {
+        if self.w <= 1 || self.h <= 1 {
             return;
         }
 
@@ -43,6 +45,11 @@ impl Section {
         sections.push(Section::new(self.x, self.y + h1, w1, h2));
         sections.push(Section::new(self.x + w1, self.y + h1, w2, h2));
 
+        // println!("{} {} {} {}", self.x, self.y, w1, h1);
+        // println!("{} {} {} {}", self.x + w1, self.y, w2, h1);
+        // println!("{} {} {} {}", self.x, self.y + h1, w1, h2);
+        // println!("{} {} {} {}", self.x + w1, self.y + h1, w2, h2);
+
         sections.iter_mut().for_each(|s| s.subdivide(level - 1));
 
         self.sub_sections = Some(sections);
@@ -50,8 +57,14 @@ impl Section {
 
     pub fn fill_leaves(&self, mut img: DynamicImage) -> DynamicImage {
         if let Some(children) = self.sub_sections.as_ref() {
-            for child in children {
-                img = child.fill_leaves(img);
+            let rnd = weak_random();
+            println!("{}", rnd);
+            if rnd > 50 {
+                for child in children {
+                    img = child.fill_leaves(img);
+                }
+            } else {
+                img = self.fill(img);
             }
         } else {
             img = self.fill(img);

@@ -3,6 +3,7 @@ use std::{collections::HashMap, env};
 pub struct Settings {
     pub input_path: String,
     pub output_path: String,
+    pub subdivisions: u32,
 }
 
 pub fn get_settings() -> Settings {
@@ -14,6 +15,10 @@ pub fn get_settings() -> Settings {
             .get("output_path")
             .expect("No output path")
             .to_owned(),
+        subdivisions: values
+            .get("subdivisions")
+            .map(|s| s.parse().expect("Subdivisions must be a number"))
+            .unwrap_or(2),
     }
 }
 
@@ -31,6 +36,15 @@ fn take_input() -> HashMap<&'static str, String> {
                 let prev = values.insert("output_path", output_path);
                 if let Some(_) = prev {
                     eprintln!("Warning: Output path was already set.")
+                }
+            }
+            "-s" => {
+                let next = args.next();
+                let subdivisions = next.expect("Expected number of subdivisions after -s");
+
+                let prev = values.insert("subdivisions", subdivisions);
+                if let Some(_) = prev {
+                    eprintln!("Warning: Number of subdivisions was already set.")
                 }
             }
             _ => {

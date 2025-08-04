@@ -13,7 +13,7 @@ fn main() {
     let h = img.height();
 
     let mut section = Section::new(100, 100, w - 200, h - 200);
-    section.subdivide(2);
+    section.subdivide(settings.subdivisions);
     section.init(&img);
 
     let img = section.fill_leaves(img);
