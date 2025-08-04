@@ -4,6 +4,7 @@ pub struct Settings {
     pub input_path: String,
     pub output_path: String,
     pub subdivisions: u32,
+    pub threshold: u8,
 }
 
 pub fn get_settings() -> Settings {
@@ -19,6 +20,13 @@ pub fn get_settings() -> Settings {
             .get("subdivisions")
             .map(|s| s.parse().expect("Subdivisions must be a number"))
             .unwrap_or(2),
+        threshold: values
+            .get("threshold")
+            .map(|s| {
+                s.parse()
+                    .expect("Threshold must be a number between 0 and 255")
+            })
+            .unwrap_or(200),
     }
 }
 
@@ -45,6 +53,15 @@ fn take_input() -> HashMap<&'static str, String> {
                 let prev = values.insert("subdivisions", subdivisions);
                 if let Some(_) = prev {
                     eprintln!("Warning: Number of subdivisions was already set.")
+                }
+            }
+            "-t" => {
+                let next = args.next();
+                let threshold = next.expect("Expected threshold after -t");
+
+                let prev = values.insert("threshold", threshold);
+                if let Some(_) = prev {
+                    eprintln!("Warning: Threshold was already set.")
                 }
             }
             _ => {

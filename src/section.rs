@@ -55,10 +55,32 @@ impl Section {
         self.sub_sections = Some(sections);
     }
 
+    pub fn pixelate(&self, mut img: DynamicImage, threshold: u8) -> DynamicImage {
+        match self.sub_sections.as_ref() {
+            Some(children) => {
+                let avg = self.avg.unwrap();
+
+                for child in children {
+                    let similarness = calc_similarness(avg, child.avg.unwrap());
+
+                    if similarness > threshold {
+                        img = child.fill(img);
+                    } else {
+                        img = child.pixelate(img, threshold);
+                    }
+                }
+            }
+            None => {
+                img = self.fill(img);
+            }
+        }
+
+        return img;
+    }
+
     pub fn fill_leaves(&self, mut img: DynamicImage) -> DynamicImage {
         if let Some(children) = self.sub_sections.as_ref() {
             let rnd = weak_random();
-            println!("{}", rnd);
             if rnd > 50 {
                 for child in children {
                     img = child.fill_leaves(img);
@@ -130,4 +152,16 @@ fn acc(a: &mut [u32; 4], b: &[u8; 4]) {
     a[1] += b[1] as u32;
     a[2] += b[2] as u32;
     a[3] += b[3] as u32;
+}
+
+/// 255 same color
+/// 0 not similar at all
+fn calc_similarness(a: Rgba<u8>, b: Rgba<u8>) -> u8 {
+    let mut diff = 0;
+    diff += a[0].abs_diff(b[0]) as u32;
+    diff += a[1].abs_diff(b[1]) as u32;
+    diff += a[2].abs_diff(b[2]) as u32;
+    // diff += a[3].abs_diff(b[3]);
+
+    return (diff / 3) as u8;
 }

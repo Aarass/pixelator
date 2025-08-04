@@ -12,11 +12,11 @@ fn main() {
     let w = img.width();
     let h = img.height();
 
-    let mut section = Section::new(100, 100, w - 200, h - 200);
+    let mut section = Section::new(0, 0, w, h);
     section.subdivide(settings.subdivisions);
     section.init(&img);
 
-    let img = section.fill_leaves(img);
+    let img = section.pixelate(img, settings.threshold);
 
     img.save(settings.output_path).unwrap();
 }
